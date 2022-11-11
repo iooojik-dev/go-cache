@@ -6,7 +6,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/iooojik/go-cache/cache"
+	"github.com/iooojik-dev/go-cache/cache"
 	"time"
 )
 
