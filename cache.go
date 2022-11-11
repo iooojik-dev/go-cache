@@ -1,13 +1,11 @@
 package cache
 
 import (
-	"sync"
 	"time"
 )
 
 type CachedMap[T any] struct {
 	m      map[string]*Data[T]
-	mu     *sync.Mutex
 	ticker *time.Ticker
 	stop   chan bool
 }
@@ -18,18 +16,14 @@ type Data[T any] struct {
 }
 
 func (tm *CachedMap[T]) Set(key string, value T, expirationDate time.Time) {
-	tm.mu.Lock()
 	tm.m[key] = &Data[T]{
 		Value:     value,
 		ExpiresAt: expirationDate.Unix(),
 	}
-	tm.mu.Unlock()
 }
 
 func (tm *CachedMap[T]) Get(key string) (*T, bool) {
-	tm.mu.Lock()
 	v := tm.m[key]
-	tm.mu.Unlock()
 	if v == nil {
 		return nil, false
 	}
@@ -38,13 +32,11 @@ func (tm *CachedMap[T]) Get(key string) (*T, bool) {
 
 func (tm *CachedMap[T]) clean() {
 	now := time.Now().Unix()
-	tm.mu.Lock()
 	for key, el := range tm.m {
 		if now >= el.ExpiresAt {
 			delete(tm.m, key)
 		}
 	}
-	tm.mu.Unlock()
 }
 
 func (tm *CachedMap[T]) StartProcessing() {
@@ -63,7 +55,6 @@ func (tm *CachedMap[T]) StartProcessing() {
 func NewCacheStorage[T any](ttl time.Duration) *CachedMap[T] {
 	t := &CachedMap[T]{
 		m:      map[string]*Data[T]{},
-		mu:     &sync.Mutex{},
 		ticker: time.NewTicker(ttl),
 		stop:   make(chan bool),
 	}
