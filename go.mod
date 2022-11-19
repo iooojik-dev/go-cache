@@ -1,3 +1,3 @@
-module github.com/iooojik/go-cache
+module github.com/iooojik-dev/go-cache
 
 go 1.18
